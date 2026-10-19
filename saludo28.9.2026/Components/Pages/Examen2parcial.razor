@@ -1,0 +1,204 @@
+﻿@page "/registro-productos"
+@rendermode InteractiveServer
+
+<!-- Título principal de la pantalla -->
+<div class="row mt-4">
+    <div class="col">
+        <h2>Registro de productos</h2>
+    </div>
+</div>
+
+<!-- Sección de entrada de datos -->
+<div class="row mt-3">
+    <div class="col">
+        <label class="form-label">No. de inventario:</label>
+        <input type="number" class="form-control" @bind="numeroInventario" />
+    </div>
+    <div class="col">
+        <label class="form-label">Descripción:</label>
+        <input type="text" class="form-control" @bind="descripcion" />
+    </div>
+    <div class="col">
+        <label class="form-label">Departamento:</label>
+        <!-- Opciones de selección mediante un input tipo select -->
+        <select class="form-control" @bind="departamento">
+            <option value="">Seleccione una opción...</option>
+            <option value="Frutas">Frutas</option>
+            <option value="Verduras">Verduras</option>
+            <option value="Lácteos">Lácteos</option>
+        </select>
+    </div>
+</div>
+
+<!-- Área de salida para mostrar mensajes de error -->
+@if (mostrarErrorVacios)
+{
+    <div class="row mt-2">
+        <div class="col">
+            <p class="text-danger fw-bold">Error: Todos los campos son obligatorios. Por favor, llena los datos faltantes.</p>
+        </div>
+    </div>
+}
+
+@if (mostrarError)
+{
+    <div class="row mt-2">
+        <div class="col">
+            <p class="text-danger fw-bold">Error: El número de inventario ya existe. Por favor, ingresa uno único.</p>
+        </div>
+    </div>
+}
+
+<!-- Fila con el conjunto de botones de acción -->
+<div class="row mt-4">
+    <div class="col">
+        <button class="btn btn-primary" @onclick="GuardarDatos">Guardar datos</button>
+        <button class="btn btn-secondary" @onclick="MostrarListaCompleta">Lista completa</button>
+        <button class="btn btn-success" @onclick='() => FiltrarLista("Frutas")'>Lista de frutas</button>
+        <button class="btn btn-success" @onclick='() => FiltrarLista("Verduras")'>Lista de verduras</button>
+        <button class="btn btn-success" @onclick='() => FiltrarLista("Lácteos")'>Lista de lácteos</button>
+    </div>
+</div>
+
+<!-- Área de tabla interactiva controlada por la variable booleana de visibilidad -->
+@if (mostrarTabla)
+{
+    <div class="row mt-4">
+        <div class="col">
+            <button class="btn btn-danger mb-3" @onclick="CerrarLista">Cerrar lista</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>No. Inventario</th>
+                        <th>Descripción</th>
+                        <th>Departamento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Renderizado iterativo de las listas paralelas usando bucle for -->
+                    @for (int i = 0; i < vistaNumeros.Count; i++)
+                    {
+                        <tr>
+                            <td>@vistaNumeros[i]</td>
+                            <td>@vistaDescripciones[i]</td>
+                            <td>@vistaDepartamentos[i]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    // Variables internas vinculadas (Data Binding) a los campos del formulario
+    private int numeroInventario = 0;
+    private string descripcion = "";
+    private string departamento = "";
+
+    // Listas paralelas principales en memoria para almacenar los datos del inventario[cite: 1]
+    private List<int> invNumeros = new List<int>();
+    private List<string> invDescripciones = new List<string>();
+    private List<string> invDepartamentos = new List<string>();
+
+    // Listas paralelas secundarias utilizadas exclusivamente para renderizar la tabla[cite: 1]
+    private List<int> vistaNumeros = new List<int>();
+    private List<string> vistaDescripciones = new List<string>();
+    private List<string> vistaDepartamentos = new List<string>();
+
+    // Variables booleanas para controlar el estado de visibilidad de la interfaz[cite: 1]
+    private bool mostrarError = false;
+    private bool mostrarErrorVacios = false;
+    private bool mostrarTabla = false;
+
+    // Método para validar vacíos, unicidad y almacenar los datos[cite: 1]
+    private void GuardarDatos()
+    {
+        // Reiniciamos los estados de error al intentar guardar
+        mostrarError = false;
+        mostrarErrorVacios = false;
+
+        // Validación para evitar guardar datos vacíos o con el número de inventario en 0
+        if (numeroInventario <= 0 || descripcion == "" || departamento == "")
+        {
+            mostrarErrorVacios = true;
+        }
+        else
+        {
+            bool existe = false;
+
+            // Iteración sobre la lista de números usando for para validar unicidad
+            for (int i = 0; i < invNumeros.Count; i++)
+            {
+                if (invNumeros[i] == numeroInventario)
+                {
+                    existe = true;
+                    break;
+                }
+            }
+
+            if (existe)
+            {
+                mostrarError = true;
+            }
+            else
+            {
+                // Agregamos los datos a las listas paralelas
+                invNumeros.Add(numeroInventario);
+                invDescripciones.Add(descripcion);
+                invDepartamentos.Add(departamento);
+
+                // Limpiamos los campos de entrada para el siguiente registro
+                numeroInventario = 0;
+                descripcion = "";
+                departamento = "";
+            }
+        }
+    }
+
+    // Método para preparar las listas de visualización con todos los registros
+    private void MostrarListaCompleta()
+    {
+        vistaNumeros = new List<int>();
+        vistaDescripciones = new List<string>();
+        vistaDepartamentos = new List<string>();
+
+        for (int i = 0; i < invNumeros.Count; i++)
+        {
+            vistaNumeros.Add(invNumeros[i]);
+            vistaDescripciones.Add(invDescripciones[i]);
+            vistaDepartamentos.Add(invDepartamentos[i]);
+        }
+
+        mostrarTabla = true;
+    }
+
+    // Método para filtrar y llenar las listas de visualización usando for[cite: 1]
+    private void FiltrarLista(string filtroDepto)
+    {
+        vistaNumeros = new List<int>();
+        vistaDescripciones = new List<string>();
+        vistaDepartamentos = new List<string>();
+
+        for (int i = 0; i < invDepartamentos.Count; i++)
+        {
+            if (invDepartamentos[i] == filtroDepto)
+            {
+                vistaNumeros.Add(invNumeros[i]);
+                vistaDescripciones.Add(invDescripciones[i]);
+                vistaDepartamentos.Add(invDepartamentos[i]);
+            }
+        }
+
+        mostrarTabla = true;
+    }
+
+    // Método para ocultar la tabla interactiva y limpiar las listas de visualización[cite: 1]
+    private void CerrarLista()
+    {
+        mostrarTabla = false;
+        vistaNumeros.Clear();
+        vistaDescripciones.Clear();
+        vistaDepartamentos.Clear();
+    }
+}
