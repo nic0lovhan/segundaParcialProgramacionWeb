@@ -1,0 +1,51 @@
+﻿@page "/ciclos"
+@rendermode InteractiveServer
+<h3>Ciclos</h3>
+<div class="row">
+    <div class="col-2">
+        <label for="numero" class="form-label">Número:</label>
+    </div>
+    <div class="col-auto">
+        <input type="number" id="numero" class="form-control" @bind="numero" />
+    </div>
+</div>
+<button class="btn btn-primary mb-3" @onclick="Calcular">Ejecutar</button>
+<div class="row">
+    <div class="col-12">
+@((MarkupString)resultado)
+</div>
+</div>
+@code{
+    private int numero;
+    private string resultado = "";
+    private void Calcular()
+    {
+        //forma con while
+        // int indice = 0;
+        resultado = "<table class=\"table table-striped\">";
+        //     while (indice <= numero)
+        //     {
+        //         resultado += $"<tr><td>{indice}</td></tr>";
+        //         indice++;
+        // }
+
+
+        // //forma con do while
+        // int indice = 0;
+        // do
+        // {
+        //     resultado += $"<tr><td>{indice}</td></tr>";
+        //     indice++;
+        // } while (indice <= numero);
+
+
+        //forma con for
+        for (int indice = 0; indice <= numero; indice++)
+        {
+            resultado += $"<tr><td>{indice}</td></tr>";
+        }
+
+
+        resultado += "</table>";
+    }
+}

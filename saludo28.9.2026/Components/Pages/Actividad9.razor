@@ -1,0 +1,95 @@
+﻿@page "/dias-mes"
+@rendermode InteractiveServer
+
+<h3>Conocer los días del mes</h3>
+
+<div class="row mb-3">
+    <div class="col col-2">
+        Mes
+    </div>
+    <div class="col col-10">
+        <input type="number" class="form-control" @bind="mes" />
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col col-2">
+        Año
+    </div>
+    <div class="col col-10">
+        <input type="number" class="form-control" @bind="anio" />
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <button class="btn btn-primary" @onclick="CalcularDias">Calcular</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(mensajeResultado))
+{
+    <div class="alert alert-info mt-3 mb-0" role="alert">
+        @mensajeResultado
+    </div>
+}
+
+@code {
+    private int mes;
+    private int anio;
+    private string mensajeResultado = string.Empty;
+
+    /// <summary>
+    /// Método encargado de calcular los días del mes y verificar si el año es bisiesto.
+    /// </summary>
+    private void CalcularDias()
+    {
+        // Validación del rango del mes
+        if (mes < 1 || mes > 12)
+        {
+            mensajeResultado = "Por favor, ingrese un número de mes válido (1-12).";
+            return;
+        }
+
+        // Validación del año
+        if (anio <= 0)
+        {
+            mensajeResultado = "Por favor, ingrese un año válido.";
+            return;
+        }
+
+        int totalDias = 0;
+
+        switch (mes)
+        {
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                totalDias = 31;
+                break;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                totalDias = 30;
+                break;
+            case 2:
+                // Regla de año bisiesto
+                if ((anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0))
+                {
+                    totalDias = 29;
+                }
+                else
+                {
+                    totalDias = 28;
+                }
+                break;
+        }
+
+        mensajeResultado = $"El mes {mes} del año {anio} tiene {totalDias} días";
+    }
+}

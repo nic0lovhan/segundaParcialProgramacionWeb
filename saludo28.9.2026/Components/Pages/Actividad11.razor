@@ -1,0 +1,124 @@
+﻿@page "/lista-numeros"
+@rendermode InteractiveServer
+
+<!-- Título principal descriptivo de la sección -->
+<div class="container mt-4">
+    <h2>Listas de números</h2>
+    <p class="text-muted">Ingrese dos números enteros para generar el rango y clasificarlos en pares e impares de forma ascendente.</p>
+
+    <!-- Sección de entradas de datos -->
+    <div class="card p-4 shadow-sm mb-4">
+        <!-- Entrada para el Número 1 -->
+        <div class="row mb-3">
+            <label for="num1" class="col-sm-2 col-form-label">Número 1:</label>
+            <div class="col-sm-10">
+                <input type="number" id="num1" class="form-control" @bind="numero1" />
+            </div>
+        </div>
+
+        <!-- Entrada para el Número 2 -->
+        <div class="row mb-3">
+            <label for="num2" class="col-sm-2 col-form-label">Número 2:</label>
+            <div class="col-sm-10">
+                <input type="number" id="num2" class="form-control" @bind="numero2" />
+            </div>
+        </div>
+
+        <!-- Botón de acción -->
+        <div class="row">
+            <div class="col-sm-10 offset-sm-2">
+                <button class="btn btn-primary" @onclick="CalcularListas">Calcular</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de resultados dividida en dos columnas (Pares e Impares) -->
+    <div class="row">
+        <!-- Columna de Números Pares -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Pares</h5>
+                </div>
+                <div class="card-body">
+                    @if (pares.Count > 0)
+                    {
+                        <ul class="list-group">
+                            @foreach (var num in pares)
+                            {
+                                <li class="list-group-item">@num</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">No hay números para mostrar.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna de Números Impares -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Impares</h5>
+                </div>
+                <div class="card-body">
+                    @if (impares.Count > 0)
+                    {
+                        <ul class="list-group">
+                            @foreach (var num in impares)
+                            {
+                                <li class="list-group-item">@num</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">No hay números para mostrar.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Declaración de variables para el enlazado de datos (Data Binding)
+    private int numero1;
+    private int numero2;
+
+    // Colecciones para almacenar los resultados clasificados
+    private List<int> pares = new List<int>();
+    private List<int> impares = new List<int>();
+
+    /// <summary>
+    /// Método encargado de procesar la lógica: determina los límites inferior y superior,
+    /// recorre el rango de números de forma ascendente y los clasifica en pares e impares.
+    /// </summary>
+    private void CalcularListas()
+    {
+        // Limpiar las listas anteriores antes de un nuevo cálculo
+        pares.Clear();
+        impares.Clear();
+
+        // Determinar el límite inferior y superior correctamente sin importar el orden de ingreso
+        int inicio = Math.Min(numero1, numero2);
+        int fin = Math.Max(numero1, numero2);
+
+        // Ciclo para recorrer todos los números enteros comprendidos en el rango (incluyendo límites)
+        for (int i = inicio; i <= fin; i++)
+        {
+            // Evaluar si el número es par o impar utilizando el operador módulo
+            if (i % 2 == 0)
+            {
+                pares.Add(i);
+            }
+            else
+            {
+                impares.Add(i);
+            }
+        }
+    }
+}

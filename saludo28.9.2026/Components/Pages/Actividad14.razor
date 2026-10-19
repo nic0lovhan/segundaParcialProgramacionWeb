@@ -1,0 +1,183 @@
+﻿@page "/canciones"
+@rendermode InteractiveServer
+
+<div class="container my-4">
+    <!-- Título principal descriptivo del módulo -->
+    <h2 class="mb-4">Administrar catálogo de canciones</h2>
+
+    <!-- Sección de entrada de datos y filtros -->
+    <div class="card p-4 shadow-sm mb-4">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="tituloCancion" class="form-label">Título de la canción</label>
+                <!-- Campo de texto enlazado a la variable de entrada -->
+                <input type="text" id="tituloCancion" class="form-control" @bind="nuevaCancion" placeholder="Ingrese el título..." />
+            </div>
+            <div class="col-md-6 d-flex align-items-end mt-2 mt-md-0">
+                <!-- Conjunto de botones de acción principales -->
+                @if (indiceEdicion.HasValue)
+                {
+                    <button class="btn btn-success me-2" @onclick="GuardarCambios">Actualizar</button>
+                    <button class="btn btn-secondary me-2" @onclick="CancelarEdicion">Cancelar</button>
+                }
+                else
+                {
+                    <button class="btn btn-primary me-2" @onclick="AgregarCancion">Agregar</button>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-2 mb-md-0">
+                <!-- Campo de texto para filtrado por palabra clave -->
+                <input type="text" class="form-control" @bind="terminoBusqueda" @bind:event="oninput" placeholder="Filtrar por palabra clave..." />
+            </div>
+            <div class="col-md-6 d-flex flex-wrap gap-2">
+                <!-- Botones de ordenamiento y control de filtros -->
+                <button class="btn btn-outline-secondary btn-sm" @onclick="OrdenarAscendente">Ordenar Ascendente</button>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="OrdenarDescendente">Ordenar Descendente</button>
+                <button class="btn btn-outline-dark btn-sm" @onclick="LimpiarFiltro">Limpiar filtro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de tabla interactiva visible en todo momento -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Título de la Canción</th>
+                        <th class="text-end" style="width: 180px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (CancionesFiltradas.Any())
+                    {
+                        @foreach (var cancion in CancionesFiltradas)
+                        {
+                            <tr>
+                                <td>@cancion</td>
+                                <td class="text-end">
+                                    <!-- Opciones para seleccionar/editar y eliminar -->
+                                    <button class="btn btn-sm btn-warning me-1" @onclick="() => IniciarEdicion(cancion)">Editar</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => EliminarCancion(cancion)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted py-3">No hay canciones registradas en la lista.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Colección principal en memoria inicializada vacía
+    private List<string> listaCanciones = new List<string>();
+
+    // Variables de estado para el enlace de datos y la lógica del componente
+    private string nuevaCancion = string.Empty;
+    private string terminoBusqueda = string.Empty;
+    private int? indiceEdicion = null;
+    private string cancionOriginal = string.Empty;
+
+    // Propiedad calculada para manejar el filtrado dinámico mediante LINQ (insensible a mayúsculas/minúsculas)
+    private IEnumerable<string> CancionesFiltradas
+    {
+        get
+        {
+            var resultado = string.IsNullOrWhiteSpace(terminoBusqueda)
+                ? listaCanciones
+                : listaCanciones.Where(c => c.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase));
+            return resultado;
+        }
+    }
+
+    // Método para agregar una nueva canción validando que no esté vacía ni duplicada
+    private void AgregarCancion()
+    {
+        if (string.IsNullOrWhiteSpace(nuevaCancion)) return;
+
+        string tituloNormalizado = nuevaCancion.Trim();
+
+        // Verificación de duplicados en la colección
+        if (listaCanciones.Contains(tituloNormalizado, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        listaCanciones.Add(tituloNormalizado);
+        nuevaCancion = string.Empty;
+    }
+
+    // Método para preparar la interfaz para la edición de un elemento existente
+    private void IniciarEdicion(string cancion)
+    {
+        cancionOriginal = cancion;
+        nuevaCancion = cancion;
+        indiceEdicion = listaCanciones.IndexOf(cancion);
+    }
+
+    // Método para guardar los cambios realizados durante la modificación
+    private void GuardarCambios()
+    {
+        if (string.IsNullOrWhiteSpace(nuevaCancion) || !indiceEdicion.HasValue) return;
+
+        string tituloNormalizado = nuevaCancion.Trim();
+
+        // Validar duplicidad excluyendo el elemento actual que se está editando
+        bool existeDuplicado = listaCanciones
+            .Where((c, index) => index != indiceEdicion.Value)
+            .Any(c => c.Equals(tituloNormalizado, StringComparison.OrdinalIgnoreCase));
+
+        if (existeDuplicado) return;
+
+        listaCanciones[indiceEdicion.Value] = tituloNormalizado;
+        CancelarEdicion();
+    }
+
+    // Método para cancelar el estado de edición actual
+    private void CancelarEdicion()
+    {
+        indiceEdicion = null;
+        nuevaCancion = string.Empty;
+        cancionOriginal = string.Empty;
+    }
+
+    // Método para remover una canción seleccionada de la colección principal
+    private void EliminarCancion(string cancion)
+    {
+        listaCanciones.Remove(cancion);
+
+        // Si se estaba editando el elemento eliminado, cancelar la edición
+        if (cancionOriginal == cancion)
+        {
+            CancelarEdicion();
+        }
+    }
+
+    // Método para aplicar ordenamiento alfabético ascendente
+    private void OrdenarAscendente()
+    {
+        listaCanciones = listaCanciones.OrderBy(c => c).ToList();
+    }
+
+    // Método para aplicar ordenamiento alfabético descendente
+    private void OrdenarDescendente()
+    {
+        listaCanciones = listaCanciones.OrderByDescending(c => c).ToList();
+    }
+
+    // Método para limpiar el campo y criterio de búsqueda
+    private void LimpiarFiltro()
+    {
+        terminoBusqueda = string.Empty;
+    }
+}

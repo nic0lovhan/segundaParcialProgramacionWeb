@@ -1,0 +1,50 @@
+﻿@* listas desde 0 hasta el numero que se ingreso pero separado en dos tablas , la primer tabla puros pares, la segunda tabla puros numeros impares
+ *@
+
+@page "/ciclosParImpar"
+@rendermode InteractiveServer
+<h3>Ciclos Par Impar</h3>
+<div class="row">
+    <div class="col-2">
+        <label for="numero" class="form-label">Número:</label>
+    </div>
+    <div class="col-auto">
+        <input type="number" id="numero" class="form-control" @bind="numero" />
+    </div>
+</div>
+<button class="btn btn-primary mb-3" @onclick="Calcular">Ejecutar</button>
+<div class="row">
+    <div class="col-6">
+        <p>Pares</p>
+        @((MarkupString)resultadoPar)
+    </div>
+    <div class="col-6">
+        <p>Impares</p>
+        @((MarkupString)resultadoImpar)
+    </div>
+</div>
+@code {
+    private int numero;
+    private string resultadoPar = "";
+    private string resultadoImpar = "";
+    private void Calcular()
+    {
+        resultadoPar = "<table class=\"table table-striped\">";
+        resultadoImpar = "<table class=\"table table-striped\">";
+
+        //forma con for
+        for (int indice = 0; indice <= numero; indice++)
+        {
+            if(indice%2==0)
+            {
+                resultadoPar += $"<tr><td>{indice}</td></tr>";
+            }
+            else
+            {
+                    resultadoImpar += $"<tr><td>{indice}</td></tr>";
+            }
+        }
+        resultadoPar += "</table>";
+        resultadoImpar += "</table>";
+    }
+}

@@ -1,0 +1,349 @@
+﻿@*
+================================================================================
+  COMPONENTE MAESTRO BLAZOR (.NET 8/9)
+  Archivo: DemoCompleto.razor
+  Ruta de acceso: /demo-completo
+================================================================================
+*@
+
+@* 1. DIRECTIVAS DE CONFIGURACIÓN Y ENRUTAMIENTO *@
+@page "/demo-completo"
+
+@* @rendermode habilita la interactividad del lado del servidor via SignalR *@
+@rendermode InteractiveServer
+
+@* Importamos LINQ para realizar consultas sobre listas (.Where, .Count, etc.) *@
+@using System.Linq
+
+<PageTitle>Demo Completo Blazor</PageTitle>
+
+<div class="container my-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2><i class="bi bi-code-slash"></i> Guía Práctica de Blazor: Sintaxis y Lógica</h2>
+            <p class="mb-0">Integración de data binding, eventos, condicionales, ciclos y Listas C#.</p>
+        </div>
+        <div class="card-body">
+
+            @* ---------------------------------------------------------------- *@
+            @* SECCIÓN 1: ENLACE DE DATOS BIDIRECCIONAL Y EVENTOS                *@
+            @* ---------------------------------------------------------------- *@
+            <div class="row mb-4">
+                <div class="col-md-6 border-end">
+                    <h4 class="text-secondary border-bottom pb-2">1. Entrada de Datos y Eventos (@onclick y @bind)</h4>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Usuario:</label>
+                        <input type="text" class="form-control" @bind="nombreUsuario" @bind:event="oninput" placeholder="Escribe tu nombre..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Monto a Convertir (MXN):</label>
+                        <input type="number" class="form-control" @bind="montoMxn" placeholder="Ej. 1000" />
+                    </div>
+
+                    <button class="btn btn-success me-2" @onclick="CalcularConversion">
+                        <i class="bi bi-calculator"></i> Convertir a USD
+                    </button>
+
+                    <button class="btn btn-secondary" @onclick="ReiniciarFormulario">
+                        Reiniciar
+                    </button>
+                </div>
+
+                <div class="col-md-6">
+                    <h4 class="text-secondary border-bottom pb-2">Resultados y Condicionales (@if / @else)</h4>
+
+                    @if (string.IsNullOrWhiteSpace(nombreUsuario))
+                    {
+                        <div class="alert alert-warning">
+                            Ingresa tu nombre en el campo de la izquierda.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            ¡Bienvenido/a, <strong>@nombreUsuario</strong>!
+                            <span>@(montoMxn > 0 ? "Tienes un monto listo para calcular." : "Ingresa un monto mayor a 0.")</span>
+                        </div>
+                    }
+
+                    @if (montoMxn > 0 && resultadoDolares > 0)
+                    {
+                        <div class="card bg-light p-3 border-success">
+                            <p class="mb-1"><strong>Monto Ingresado:</strong> $@montoMxn.ToString("F2") MXN</p>
+                            <p class="mb-1"><strong>Tasa de Cambio:</strong> $@TASA_DOLAR MXN por USD (Constante)</p>
+                            <h5 class="text-success mb-0"><strong>Equivalente:</strong> $@resultadoDolares.ToString("F2") USD</h5>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* ---------------------------------------------------------------- *@
+            @* SECCIÓN 2: CICLOS (@for) Y PROCESAMIENTO MATEMÁTICO              *@
+            @* ---------------------------------------------------------------- *@
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h4 class="text-secondary border-bottom pb-2">2. Procesamiento Numérico con Ciclos (@for)</h4>
+
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Límite Máximo:</label>
+                            <input type="number" class="form-control" @bind="limiteNumero" min="2" max="50" />
+                        </div>
+                        <div class="col-md-4 mt-4">
+                            <button class="btn btn-primary" @onclick="GenerarNumerosPrimos">
+                                Calcular Primos (2 a @limiteNumero)
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (listaNumerosPrimos.Count > 0)
+                    {
+                        <h5>Números Primos Encontrados:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (int num in listaNumerosPrimos)
+                            {
+                                <span class="badge bg-primary fs-6">@num</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* ---------------------------------------------------------------- *@
+            @* SECCIÓN 3: MANEJO DE COLECCIONES List<T> Y MÉTODOS LINQ           *@
+            @* ---------------------------------------------------------------- *@
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h4 class="text-secondary border-bottom pb-2">3. Colecciones List&lt;T&gt;, LINQ y Tablas Dinámicas</h4>
+
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" @bind="nuevaTareaTitulo" placeholder="Escribe el título de una nueva tarea..." />
+
+                        <select class="form-select" @bind="categoriaSeleccionada" style="max-width: 180px;">
+                            <option value="Estudio">Estudio</option>
+                            <option value="Trabajo">Trabajo</option>
+                            <option value="Personal">Personal</option>
+                        </select>
+
+                        <button class="btn btn-success" @onclick="AgregarTarea">
+                            <i class="bi bi-plus-circle"></i> Agregar Tarea
+                        </button>
+                    </div>
+
+                    <div class="mb-3 btn-group">
+                        <button class="btn btn-outline-secondary" @onclick='() => FiltrarPorCategoria("Todas")'>Todas (@listaTareas.Count)</button>
+                        <button class="btn btn-outline-secondary" @onclick='() => FiltrarPorCategoria("Estudio")'>Estudio</button>
+                        <button class="btn btn-outline-secondary" @onclick='() => FiltrarPorCategoria("Trabajo")'>Trabajo</button>
+                        <button class="btn btn-outline-secondary" @onclick='() => FiltrarPorCategoria("Personal")'>Personal</button>
+                        <button class="btn btn-outline-danger" @onclick="LimpiarTodasLasTareas">Vaciar Lista (.Clear)</button>
+                    </div>
+
+                    @if (TareasFiltradas.Count == 0)
+                    {
+                        <p class="text-muted fst-italic">No hay tareas registradas en esta categoría.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-hover table-bordered align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Título</th>
+                                    <th>Categoría</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < TareasFiltradas.Count; i++)
+                                {
+                                    int index = i;
+                                    var tarea = TareasFiltradas[i];
+
+                                    <tr>
+                                        <td>@(index + 1)</td>
+                                        <td class="@(tarea.Completada ? "text-decoration-line-through text-muted" : "")">
+                                            @tarea.Titulo
+                                        </td>
+                                        <td><span class="badge bg-info text-dark">@tarea.Categoria</span></td>
+                                        <td>
+                                            @switch (tarea.Completada)
+                                            {
+                                                case true:
+                                                    <span class="badge bg-success">Completada</span>
+                                                    break;
+                                                case false:
+                                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-success me-1" @onclick="() => CambiarEstadoTarea(tarea)">
+                                                Cambiar Estado
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => EliminarTarea(tarea.Id)">
+                                                Eliminar (.Remove)
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+
+            @* ---------------------------------------------------------------- *@
+            @* SECCIÓN 4: RENDERIZADO DE HTML DINÁMICO (MarkupString)            *@
+            @* ---------------------------------------------------------------- *@
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="text-secondary border-bottom pb-2">4. Renderizado Dinámico con MarkupString</h4>
+                    <button class="btn btn-info text-white mb-2" @onclick="GenerarReporteHtml">
+                        Generar Reporte HTML
+                    </button>
+
+                    <div>
+                        @((MarkupString)reporteHtml)
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private string nombreUsuario = "";
+    private double montoMxn = 0;
+    private double resultadoDolares = 0;
+
+    private const double TASA_DOLAR = 18.50;
+    private int limiteNumero = 20;
+
+    private List<int> listaNumerosPrimos = new List<int>();
+
+    private string nuevaTareaTitulo = "";
+    private string categoriaSeleccionada = "Estudio";
+    private string filtroCategoriaActual = "Todas";
+    private int contadorId = 0;
+
+    private List<TareaModel> listaTareas = new List<TareaModel>();
+    private string reporteHtml = "";
+
+    private void CalcularConversion()
+    {
+        if (montoMxn > 0)
+        {
+            resultadoDolares = montoMxn / TASA_DOLAR;
+        }
+        else
+        {
+            resultadoDolares = 0;
+        }
+    }
+
+    private void ReiniciarFormulario()
+    {
+        nombreUsuario = "";
+        montoMxn = 0;
+        resultadoDolares = 0;
+    }
+
+    private void GenerarNumerosPrimos()
+    {
+        listaNumerosPrimos.Clear();
+
+        for (int i = 2; i <= limiteNumero; i++)
+        {
+            bool esPrimo = true;
+
+            for (int j = 2; j <= Math.Sqrt(i); j++)
+            {
+                if (i % j == 0)
+                {
+                    esPrimo = false;
+                    break;
+                }
+            }
+
+            if (esPrimo)
+            {
+                listaNumerosPrimos.Add(i);
+            }
+        }
+    }
+
+    private void AgregarTarea()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevaTareaTitulo))
+        {
+            contadorId++;
+
+            var nuevaTarea = new TareaModel
+            {
+                Id = contadorId,
+                Titulo = nuevaTareaTitulo,
+                Categoria = categoriaSeleccionada,
+                Completada = false
+            };
+
+            listaTareas.Add(nuevaTarea);
+            nuevaTareaTitulo = "";
+        }
+    }
+
+    private void CambiarEstadoTarea(TareaModel tarea)
+    {
+        tarea.Completada = !tarea.Completada;
+    }
+
+    private void EliminarTarea(int id)
+    {
+        listaTareas.RemoveAll(t => t.Id == id);
+    }
+
+    private void LimpiarTodasLasTareas()
+    {
+        listaTareas.Clear();
+    }
+
+    private void FiltrarPorCategoria(string categoria)
+    {
+        filtroCategoriaActual = categoria;
+    }
+
+    private List<TareaModel> TareasFiltradas
+    {
+        get
+        {
+            if (filtroCategoriaActual == "Todas")
+            {
+                return listaTareas;
+            }
+            return listaTareas.Where(t => t.Categoria == filtroCategoriaActual).ToList();
+        }
+    }
+
+    private void GenerarReporteHtml()
+    {
+        int total = listaTareas.Count;
+        int completadas = listaTareas.Count(t => t.Completada);
+
+        reporteHtml = $@"
+            <div class='alert alert-success mt-2'>
+                <h5><i class='bi bi-check-circle'></i> Reporte Generado Dinámicamente</h5>
+                <p class='mb-0'>Total de Tareas: <strong>{total}</strong> | Completadas: <strong>{completadas}</strong></p>
+            </div>";
+    }
+
+    public class TareaModel
+    {
+        public int Id { get; set; }
+        public string Titulo { get; set; } = "";
+        public string Categoria { get; set; } = "Estudio";
+        public bool Completada { get; set; }
+    }
+}

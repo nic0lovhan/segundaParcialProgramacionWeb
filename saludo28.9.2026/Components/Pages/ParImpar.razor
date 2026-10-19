@@ -1,0 +1,44 @@
+﻿@page "/parimpar"
+@rendermode InteractiveServer
+<div class="row mb-3">
+    <div class="col col-2">
+        Escribe el número:
+    </div>
+    <div class="col col-10">
+        <input type="number" class="form-control" @bind="Numero" />
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col">
+        <button class="btn btn-primary" @onclick="Ejecutar">Ejecutar</button>
+    </div>
+</div>
+
+<div class="alert alert-@_class">
+    <h1>@_letrero</h1>
+</div>
+
+@code {
+    private int Numero;
+    private string _class = "success";
+    private string _letrero = "Par";
+
+    private void Ejecutar()
+    {
+        if(Numero%2==0)
+        {
+            _class = "success";
+            _letrero = "Par";
+        }
+        else
+        {
+            _class = "danger";
+            _letrero = "Impar";
+        }
+    }
+    // {
+    //     _class = (Numero % 2 == 0) ? "success" : "danger";
+    //     _letrero = (Numero % 2 == 0) ? "Par" : "Impar";
+    // }
+
+}

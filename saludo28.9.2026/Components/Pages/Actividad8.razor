@@ -1,0 +1,113 @@
+﻿
+@page "/cambio-moneda"
+@rendermode InteractiveServer
+
+<PageTitle>Cambio de Moneda</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Calculadora de Cambio de Moneda</h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- Sección de Entrada de Datos -->
+                    <div class="mb-4">
+                        <label for="montoMxn" class="form-label font-weight-bold">Cantidad en Pesos Mexicanos (MXN):</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <!-- Enlazado bidireccional (Data Binding) con la propiedad MontoMxn -->
+                            <!-- Se restringe a números enteros positivos mediante los atributos min y step -->
+                            <input type="number" id="montoMxn" class="form-control" @bind="MontoMxn" min="0" step="1" placeholder="Ingrese una cantidad entera" />
+                        </div>
+                    </div>
+
+                    <!-- Sección de Acción -->
+                    <div class="d-grid gap-2 mb-4">
+                        <!-- Disparador del evento que invoca la lógica de conversión en C# -->
+                        <button class="btn btn-success btn-lg" @onclick="CalcularConversiones">
+                            Convertir
+                        </button>
+                    </div>
+
+                    <!-- Sección de Salida de Datos -->
+                    <h5 class="text-secondary border-bottom pb-2">Equivalencias</h5>
+                    <div class="row mt-3 text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h6 class="text-muted mb-2">Dólares (USD)</h6>
+                                <!-- Se muestra el resultado formateado a tres decimales -->
+                                <h4 class="text-primary mb-0">$ @Math.Round(TotalUsd, 3)</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h6 class="text-muted mb-2">Euros (EUR)</h6>
+                                <h4 class="text-primary mb-0">€ @Math.Round(TotalEur, 3)</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h6 class="text-muted mb-2">Libras (GBP)</h6>
+                                <h4 class="text-primary mb-0">£ @Math.Round(TotalGbp, 3)</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // ----------------------------------------------------------------
+    // 1. Definición de Tipos de Cambio (Constantes Obligatorias)
+    // ----------------------------------------------------------------
+    // Se declaran como constantes (const) para garantizar que el valor
+    // no mutará durante el ciclo de vida de la aplicación, simulando
+    // tasas de cambio fijas sin necesidad de consultar APIs externas.
+    private const double TasaUsd = 17.15;
+    private const double TasaEur = 18.60;
+    private const double TasaGbp = 21.75;
+
+    // ----------------------------------------------------------------
+    // 2. Estado del Componente (Variables de Entrada y Salida)
+    // ----------------------------------------------------------------
+    // Se exige un número entero positivo para los pesos mexicanos.
+    private int MontoMxn { get; set; } = 0;
+
+    // Variables de punto flotante para almacenar los cálculos exactos.
+    private double TotalUsd { get; set; } = 0;
+    private double TotalEur { get; set; } = 0;
+    private double TotalGbp { get; set; } = 0;
+
+    // ----------------------------------------------------------------
+    // 3. Lógica de Procesamiento
+    // ----------------------------------------------------------------
+    /// <summary>
+    /// Método invocado por el botón "Convertir".
+    /// Realiza las operaciones aritméticas utilizando el estado actual
+    /// de MontoMxn y las constantes definidas.
+    /// </summary>
+    private void CalcularConversiones()
+    {
+        // Validación de seguridad para evitar cálculos con números negativos
+        if (MontoMxn > 0)
+        {
+            // La conversión se realiza dividiendo los pesos entre la tasa respectiva
+            TotalUsd = MontoMxn / TasaUsd;
+            TotalEur = MontoMxn / TasaEur;
+            TotalGbp = MontoMxn / TasaGbp;
+        }
+        else
+        {
+            // Si el monto ingresado es 0 o negativo, se limpian los resultados
+            TotalUsd = 0;
+            TotalEur = 0;
+            TotalGbp = 0;
+        }
+    }
+}

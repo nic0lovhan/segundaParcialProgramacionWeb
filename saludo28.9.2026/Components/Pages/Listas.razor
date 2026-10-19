@@ -1,0 +1,69 @@
+﻿@page "/listas"
+@using Microsoft.AspNetCore.Components.Authorization
+@rendermode InteractiveServer
+<h3>Listas</h3>
+<div class="row mb-3">
+    <div class="col-2">
+        <label class="form-label">Calificación</label>
+    </div>
+    <div class="col-auto">
+        <input type="number" class="form-control" id="txtCalif" @bind="calificacion" />
+    </div>
+</div>
+<button class="btn btn-primary" @onclick="Guardar">Guardar</button>
+<button class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+<button class="btn btn-secondary" @onclick="Buscar">Buscar</button>
+
+
+<hr />
+@if (calificaciones.Count > 0)
+{
+    <h2>Calificaciones capturadas @(calificaciones.Count)</h2>
+    <hr />
+    <h3>@mensaje</h3>
+    <hr />
+    <h3>@(calificaciones.Count(dato=>dato==0)) calificaciones iguales a "0" </h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Calificación</th>
+            </tr>
+        </thead>
+        <tbody>
+            @* @for (int indice = 0; indice < calificaciones.Count; indice++)
+            {
+                <tr><td>@calificaciones[indice]</td></tr>
+            } *@
+            @foreach(int dato in calificaciones)
+            {
+                <tr><td>@dato</td></tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private int calificacion;
+    private List<int> calificaciones = new();
+    private string mensaje = "";
+    private void Guardar()
+    {
+        calificaciones.Add(calificacion);
+        calificacion = 0;
+    }
+    private void Eliminar()
+    {
+        // Busca el primer dato de la coleccion, busca el dato no el numero/posiciono de dato 
+        //calificaciones.Remove(calificacion);
+
+        //este borra la posicion del dato o numero, cuidado de que la posicion existe porque si no se desborda
+        calificaciones.RemoveAt(calificacion);
+        //borrar todo es clear
+    }
+    private void Buscar()
+    {
+        mensaje = (calificaciones.Contains(calificacion)) ? "Encontrado" : "No localizado";
+        //metodos no parentesis,  propeidad parentesis
+    }
+}

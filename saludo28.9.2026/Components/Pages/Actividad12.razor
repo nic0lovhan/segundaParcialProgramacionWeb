@@ -1,0 +1,118 @@
+﻿@page "/primos"
+@rendermode InteractiveServer
+
+<hr />
+
+<!-- Sección de entrada de datos utilizando filas y clases nativas de Bootstrap -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label for="numeroLimite" class="form-label">Ingrese un número entero positivo:</label>
+        <!-- Campo de entrada numérico enlazado mediante @bind al modelo en C# -->
+        <input type="number" id="numeroLimite" class="form-control" @bind="limiteSuperior" placeholder="Ej. 50" min="1" />
+    </div>
+</div>
+
+<!-- Fila para el botón de acción con la directiva @onclick obligatoria -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <button class="btn btn-primary" @onclick="GenerarPrimos">Generar primos</button>
+    </div>
+</div>
+
+<!-- Mensaje de error o validación condicional -->
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="alert alert-danger" role="alert">
+                @mensajeError
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Área de resultados donde se muestra la colección de números primos de forma dinámica -->
+@if (numerosPrimos != null && numerosPrimos.Count > 0)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Resultados (Total encontrados: @numerosPrimos.Count)
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var primo in numerosPrimos)
+                        {
+                            <li class="list-group-item">@primo</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    // Declaración de variables y propiedades de estado del componente
+    private int limiteSuperior;
+    private List<int> numerosPrimos = new List<int>();
+    private string mensajeError = string.Empty;
+
+    /// <summary>
+    /// Método encargado de validar la entrada del usuario y ejecutar el algoritmo
+    /// para calcular los números primos desde 1 hasta el límite superior ingresado.
+    /// </summary>
+    private void GenerarPrimos()
+    {
+        // Limpiar resultados anteriores y mensajes de error
+        numerosPrimos.Clear();
+        mensajeError = string.Empty;
+
+        // Validación: Verificar que el número ingresado sea un entero positivo mayor que 0
+        if (limiteSuperior <= 0)
+        {
+            mensajeError = "Por favor, ingrese un número entero positivo mayor a 0.";
+            return;
+        }
+
+        // Estructura repetitiva para evaluar cada número desde 1 hasta el límite superior
+        for (int i = 1; i <= limiteSuperior; i++)
+        {
+            if (EsPrimo(i))
+            {
+                // Almacenar el número primo encontrado en la colección
+                numerosPrimos.Add(i);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Función auxiliar para determinar si un número entero es primo.
+    /// Un número primo es un número entero mayor que 1 que solo es divisible por 1 y por sí mismo.
+    /// </summary>
+    /// <param name="numero">Número entero a evaluar.</param>
+    /// <returns>True si es primo, false en caso contrario.</returns>
+    private bool EsPrimo(int numero)
+    {
+        // Los números menores o iguales a 1 no son primos
+        if (numero <= 1)
+        {
+            return false;
+        }
+
+        // Evaluar divisores desde 2 hasta la raíz cuadrada del número
+        for (int i = 2; i <= Math.Sqrt(numero); i++)
+        {
+            if (numero % i == 0)
+            {
+                return false; // Se encontró un divisor exacto, por lo tanto no es primo
+            }
+        }
+
+        return true; // Es primo
+    }
+
+
+}

@@ -1,0 +1,70 @@
+﻿@page "/estado-sistema"
+@rendermode InteractiveServer
+
+<!-- Título principal descriptivo del módulo -->
+<div class="container mt-4">
+    <h2>Estado del Sistema</h2>
+    <p class="text-muted">Módulo de monitoreo básico para verificar el estado de los servicios web.</p>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Sección de entrada para actualizar el parámetro CodigoEstado -->
+            <div class="mb-3">
+                <label for="inputCodigo" class="form-label">Código de Estado:</label>
+                <input id="inputCodigo" type="number" class="form-control" @bind="CodigoEstado" />
+            </div>
+
+            <!-- Botón de acción para disparar la verificación -->
+            <button class="btn btn-primary" @onclick="VerificarEstado">Verificar Estado</button>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <!-- Área de salida visual en forma de alerta dinámica de Bootstrap -->
+            <div class="alert alert-@ObtenerClaseAlerta()" role="alert">
+                <h4 class="alert-heading">Código actual: @CodigoEstado</h4>
+                <p class="mb-0"><strong>Mensaje:</strong> @ObtenerMensajeEstado()</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Parámetro público que recibe el código de estado numérico (por defecto 200).
+    /// </summary>
+    [Parameter]
+    public int CodigoEstado { get; set; } = 200;
+
+    /// <summary>
+    /// Método de evento opcional para manejar la acción del botón.
+    /// La interactividad se gestiona de manera fluida mediante el enlace de datos (@bind).
+    /// </summary>
+    private void VerificarEstado()
+    {
+        // Lógica adicional de control o registro de eventos de ser requerida en el futuro.
+    }
+
+    /// <summary>
+    /// Evalúa el código de estado y retorna el mensaje descriptivo correspondiente.
+    /// </summary>
+    private string ObtenerMensajeEstado() => CodigoEstado switch
+    {
+        200 => "Sistema Operacional",
+        404 => "Recurso No Encontrado",
+        500 => "Error Interno del Servidor",
+        _ => "Estado Desconocido"
+    };
+
+    /// <summary>
+    /// Mapea el código numérico con la clase de color correspondiente de Bootstrap.
+    /// </summary>
+    private string ObtenerClaseAlerta() => CodigoEstado switch
+    {
+        200 => "success",   // Verde
+        404 => "warning",   // Amarillo
+        500 => "danger",    // Rojo
+        _ => "secondary"  // Gris
+    };
+}

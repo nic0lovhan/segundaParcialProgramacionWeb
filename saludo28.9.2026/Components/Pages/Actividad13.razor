@@ -1,0 +1,94 @@
+﻿@page "/actividades"
+@rendermode InteractiveServer
+
+<!-- Título principal descriptivo del módulo -->
+<div class="container mt-4">
+    <h2>Lista de actividades por hacer</h2>
+    <p class="text-muted">¡Administra tus tareas pendientes!</p>
+
+    <!-- Sección de entrada para una nueva tarea -->
+    <div class="row mb-3">
+        <div class="col-md-8 mb-2 mb-md-0">
+            <!-- Campo de texto enlazado bidireccionalmente a la variable nuevaTarea -->
+            <input type="text" class="form-control" placeholder="Escribe la descripción de la actividad..." @bind="nuevaTarea" />
+        </div>
+        <div class="col-md-4">
+            <!-- Botón de acción con @onclick para agregar la tarea a la colección -->
+            <button class="btn btn-primary w-100" @onclick="AgregarTarea">Agregar</button>
+        </div>
+    </div>
+
+    <!-- Sección de visualización de las tareas almacenadas -->
+    <div class="row">
+        <div class="col-12">
+            @if (tareas.Count == 0)
+            {
+                <!-- Mensaje informativo si la lista se encuentra vacía -->
+                <div class="alert alert-secondary" role="alert">
+                    No hay actividades registradas en este momento. ¡Agrega una nueva tarea arriba!
+                </div>
+            }
+            else
+            {
+                <!-- Tabla para enlistar dinámicamente las actividades -->
+                <table class="table table-striped table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Descripción de la Actividad</th>
+                            <th class="text-center" style="width: 150px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Renderizado iterativo de la colección de tareas -->
+                        @for (int i = 0; i < tareas.Count; i++)
+                        {
+                            var index = i; // Variable local para capturar correctamente el índice en el ámbito del evento
+                            <tr>
+                                <td>@(index + 1)</td>
+                                <td>@tareas[index]</td>
+                                <td class="text-center">
+                                    <!-- Botón para eliminar la tarea utilizando @onclick y pasando el índice -->
+                                    <button class="btn btn-danger btn-sm" @onclick="() => EliminarTarea(index)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    // Colección en memoria de tipo List<string> para almacenar temporalmente las tareas
+    private List<string> tareas = new List<string>();
+
+    // Variable de enlace para capturar el texto ingresado en el input
+    private string nuevaTarea = string.Empty;
+
+    /// <summary>
+    /// Valida que el campo no esté vacío, agrega la nueva tarea a la colección
+    /// y limpia el campo de texto para una nueva entrada.
+    /// </summary>
+    private void AgregarTarea()
+    {
+        if (!string.IsNullOrWhiteSpace(nuevaTarea))
+        {
+            tareas.Add(nuevaTarea.Trim());
+            nuevaTarea = string.Empty; // Limpieza del campo de entrada
+        }
+    }
+
+    /// <summary>
+    /// Remueve un elemento específico de la colección basándose en su índice numérico.
+    /// </summary>
+    /// <param name="index">Índice del elemento a eliminar dentro de la lista.</param>
+    private void EliminarTarea(int index)
+    {
+        if (index >= 0 && index < tareas.Count)
+        {
+            tareas.RemoveAt(index);
+        }
+    }
+}

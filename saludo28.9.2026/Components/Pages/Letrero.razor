@@ -1,0 +1,100 @@
+﻿@page "/letrero"
+@rendermode InteractiveServer
+<div class="alert alert-info" role="alert">
+    <h3>@Lentrero</h3>
+    @* <h4>Edad: <input type="number" class="form-control" @bind="variable" /></h4>
+    <<h5>Altura: @variableFlotante m</h5> *@
+
+</div>
+
+<div class="row mb-3">
+    <div class="col-6">
+        <input class="form-control" @bind="_nombre"/>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-3">
+        <input type="date" class="form-control" @bind="_fecha" />
+    </div>
+</div>
+
+<button class="btn btn-primary"
+@onclick="Saludar">Saludar</button>
+<div>
+
+</div>
+
+@code {
+    [Parameter]
+    public string Lentrero { get; set; } = "Letrero de inicio";
+    private string _nombre = string.Empty;
+    private int Entero = 10;
+    private float ConDecimales = 3.1416F;
+    private DateTime _fecha = DateTime.Now;
+
+    private void Saludar()
+    {
+        Lentrero = $"Hola {_nombre}. Edad {Entero}. Fecha{_fecha.ToShortDateString()}";
+        // Lentrero = "Hola " + _nombre;
+
+        //Entero = Convert.ToInt32(ConDecimales);
+        Lentrero = ((Entero >= 18) || (Entero < 50)).ToString();
+
+
+
+    //     //         Title = (variableEntero => 18) ? "Eres mayor de edad"
+    //     // : "Eres menor de edad";
+    //     //         if (variableEntero == 10)
+    //     //         {
+    //     //             Title = "obtuviste un A+";
+    //     //         }
+    //     //         else if (variableEntero == 9)
+    //     //         {
+    //     //             Title = "Obutuviste un A";
+
+    //     //         }
+    //     //         else if (variableEntero == 8)
+    //     //         {
+    //     //             Title = "Obtuviste un B"
+    //     //     }
+    //     //         else if (variableEntero == 6)
+    //     //         {
+    //     //             Title = "Obtuviste un D";
+    //     //         }
+    //     //         else
+    //     //         {
+    //     //             Title = "Obtuviste un F";
+    //     //         }
+
+    //     switch (variableEntero)
+    //     {
+    //         case 1
+    //                 Title = "obtuviste un A+";
+    //             break;
+    //         case 9:
+    //             Title = "Obutuviste un A";
+    //             break;
+    //         case 8:
+    //             Title = "Obtuviste un B";
+    //             break;
+    //         case 7:
+    //             Title = "Obtuviste un C";
+    //             break;
+    //         case 6:
+    //             Title = "Obtuviste un D";
+    //             break;
+    //         default:
+    //             Title = "Obtuviste un F";
+    //             break;
+    //     }
+    // }
+    // //si es par en verde, si es impar en azul
+
+
+    // private void pares()
+    // {
+        
+    }
+
+}
